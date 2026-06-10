@@ -1,6 +1,7 @@
 #imports
 import pygame
 import sys
+import random
 
 #initialize pygame
 pygame.init()
@@ -36,6 +37,24 @@ stability_decrease = 15
 #screen setup
 screen = pygame.display.set_mode((GAMELENGTH, GAMELENGTH))
 font = pygame.font.SysFont(None, 28)
+
+def glitch_effect_y(screen):
+    for _ in range(8):
+        y = random.randint(0, GAMELENGTH - 20)
+        height = random.randint(4, 18)
+        offset = random.randint(-20, 20)
+
+        strip = screen.subsurface((0, y, GAMELENGTH, height)).copy()
+        screen.blit(strip, (offset, y))
+
+def glitch_effect_x(screen):
+    for _ in range(8):
+        x = random.randint(0, GAMELENGTH - 20)
+        width = random.randint(4, 18)
+        offset = random.randint(-20, 20)
+
+        strip = screen.subsurface((x, 0, width, GAMELENGTH)).copy()
+        screen.blit(strip, (x, offset))
 
 #dimension change function
 def dim_change(keys, player_dim, current_time, last_dim_change_time, stability_level, decreasing, player_x, player_y):
@@ -150,6 +169,9 @@ while running:
     for wall_rect in stiff_wall_rects:
         pygame.draw.rect(screen, DIM_COLOR_STIFF, wall_rect)
     
+    if stability_meter <= 0:
+        running = False
+
     meter = pygame.Rect(680, 40, stability_meter, TILESIZE)
     stability_meter, STABILITY_COLOR = stability_bar(stability_meter, STABILITY_COLOR)
     stability_percent = int((stability_meter / MAX_STABILITY) * 100)
@@ -157,6 +179,12 @@ while running:
     stability_text_rect = stability_text.get_rect(midbottom=meter.midtop)
     screen.blit(stability_text, stability_text_rect)
     pygame.draw.rect(screen, STABILITY_COLOR, meter)
+    if keys[pygame.K_SPACE]:
+        glitch_effect_y(screen)
+    if stability_meter <= 75:
+        glitch_effect_y(screen)
+    if stability_meter <= 50:
+        glitch_effect_x(screen)
     pygame.display.flip() #refreshing game
 
 #what happens after loop finishes
